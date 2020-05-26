@@ -222,7 +222,7 @@ public class EncryptorAndDecryptorProgress extends javax.swing.JFrame
 
     private void oKButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_oKButtonActionPerformed
     {//GEN-HEADEREND:event_oKButtonActionPerformed
-        new Main(true).setVisible(true);
+        new Home().setVisible(true);
         setVisible(false);
         dispose();
     }//GEN-LAST:event_oKButtonActionPerformed
