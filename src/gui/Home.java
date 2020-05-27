@@ -1,43 +1,30 @@
 package gui;
 
-import java.awt.Toolkit;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.GroupLayout;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.UIManager;
-
-import java.awt.Dialog.ModalExclusionType;
-import java.awt.Dimension;
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import data.Data;
 
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.ImageIcon;
+public class Home extends JFrame {
 
-public class Home extends javax.swing.JFrame{
-
-	private JFrame frame;
+	private JPanel contentPane;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		
-		
-		
-		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Home window = new Home();
-					window.frame.setVisible(true);
+					Home frame = new Home();
+					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -46,17 +33,15 @@ public class Home extends javax.swing.JFrame{
 	}
 
 	/**
-	 * Create the application.
+	 * Create the frame.
 	 */
 	public Home() {
 		Data.resetData();
-		initialize();
+		initComponent();
 	}
-
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
+	
+	private void initComponent() {
+		
 		try {
 			for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
             {
@@ -70,36 +55,38 @@ public class Home extends javax.swing.JFrame{
 			  System.out.println("Error setting native LAF: " + e);
 		}
 		
-		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().setLayout(null);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
 		
 		JButton EncryptBtn = new JButton("Encrypt");
-		EncryptBtn.setBounds(52, 151, 107, 35);
+		EncryptBtn.setBounds(52, 151, 123, 35);
 		EncryptBtn.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent arg0) {
         		encryptButtonActionPerformed(arg0);
         	}
         });
-		frame.getContentPane().add(EncryptBtn);
+		contentPane.setLayout(null);
+		contentPane.add(EncryptBtn);
 		
 		JButton DecryptBtn = new JButton("Decrypt");
+		DecryptBtn.setBounds(237, 151, 123, 35);
 		DecryptBtn.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent arg0) {
         		decryptButtonActionPerformed(arg0);
         	}
         });
-		DecryptBtn.setBounds(243, 151, 120, 35);
-		frame.getContentPane().add(DecryptBtn);
+		contentPane.add(DecryptBtn);
 	}
 	
 	private void encryptButtonActionPerformed(java.awt.event.ActionEvent evt)
     {
 		ShowFilesAndKey A = new ShowFilesAndKey("ENCRYPT");
 		A.setVisible(true);
-        frame.setVisible(false);
-        frame.dispose();
+        setVisible(false);
+        dispose();
        
     }
 
@@ -107,9 +94,8 @@ public class Home extends javax.swing.JFrame{
     {
     	ShowFilesAndKey A = new ShowFilesAndKey("DECRYPT");
 		A.setVisible(true);
-        frame.setVisible(false);
-        frame.dispose();
+        setVisible(false);
+        dispose();
     }
-
 
 }

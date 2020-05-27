@@ -89,14 +89,11 @@ public class FileEncryptorAndDecryptor
     
     public void encrypt(File file, JProgressBar progressBar, JLabel progressPercentLabel, long totalSizeOfAllFiles, JTextArea progressOfFilesTextField)
     {
-        byte[] keyHash;
         double percentageOfFileCopied=0;
         if(!file.isDirectory())
         {
             try
             {
-                keyHash=getHashInBytes(key);
-                
                 destinationFile=new File(file.getAbsolutePath().concat(".enc"));
                 if(destinationFile.exists())
                 {
@@ -104,36 +101,56 @@ public class FileEncryptorAndDecryptor
                     destinationFile=new File(file.getAbsolutePath().concat(".enc"));
                 }
                 
-                //BufferedInputStream fileReader=new BufferedInputStream(new FileInputStream(file.getAbsolutePath()));
                 FileInputStream fileReader = new FileInputStream(file.getAbsolutePath()); 
                 FileOutputStream fileWriter= new FileOutputStream (destinationFile, true);
                 
                 
                 
-                //encrypting content & writing
-                byte[] buffer = new byte[262144];
-                int bufferSize=buffer.length;
+                
                 byte[] key = Data.Key;
                 SecretKeySpec desKeySpec = new SecretKeySpec(key, "DES");
                 Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5PADDING");
                 cipher.init(Cipher.ENCRYPT_MODE, desKeySpec);
                 
+                byte[] buffer = new byte[fileReader.available()];
+            	fileReader.read(buffer);
+            	byte[] ciphertext = cipher.doFinal(buffer);
+            	fileWriter.write(ciphertext);
+            	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, buffer.length, totalSizeOfAllFiles);
                 
-                progressOfFilesTextField.setText(progressOfFilesTextField.getText()+"  0%\n");
-                while(fileReader.available()>0)
-                {
-                    int bytesCopied=fileReader.read(buffer);
-                    
-                    fileWriter.write(buffer, 0, bytesCopied);
-                    long fileLength=file.length();
-                    percentageOfFileCopied+= (((double)bytesCopied/fileLength)*100);
-                    showProgressOnprogressOfFilesTextField(progressOfFilesTextField, percentageOfFileCopied, bytesCopied, fileLength);
-                    
-                    showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, bytesCopied, totalSizeOfAllFiles);
-                    
-                    System.out.println("des file length= "+destinationFile.length());
-                }
-                progressOfFilesTextField.setText(progressOfFilesTextField.getText().substring(0, progressOfFilesTextField.getText().length()-5)+"100%\n");
+//                while((fileReader.available()) > 0) {
+//                	if(fileReader.available() < 8) {
+//	                	byte[] buffer = new byte[fileReader.available()];
+//	                	fileReader.read(buffer);
+//	                	byte[] ciphertext = cipher.doFinal(buffer);
+//	                	fileWriter.write(ciphertext);
+//	                	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, buffer.length, totalSizeOfAllFiles);
+//                	}
+//                	else {
+//                		byte[] buffer = new byte[8];
+//	                	fileReader.read(buffer);
+//	                	byte[] ciphertext = cipher.doFinal(buffer);
+//	                	fileWriter.write(ciphertext);
+//	                	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, buffer.length, totalSizeOfAllFiles);
+//                	}
+//                }
+                  
+//                
+//                progressOfFilesTextField.setText(progressOfFilesTextField.getText()+"  0%\n");
+//                while(fileReader.available()>0)
+//                {
+//                    int bytesCopied=fileReader.read(buffer);
+//                    
+//                    fileWriter.write(buffer, 0, bytesCopied);
+//                    long fileLength=file.length();
+//                    percentageOfFileCopied+= (((double)bytesCopied/fileLength)*100);
+//                    showProgressOnprogressOfFilesTextField(progressOfFilesTextField, percentageOfFileCopied, bytesCopied, fileLength);
+//                    
+//                    showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, bytesCopied, totalSizeOfAllFiles);
+//                    
+//                    System.out.println("des file length= "+destinationFile.length());
+//                }
+//                progressOfFilesTextField.setText(progressOfFilesTextField.getText().substring(0, progressOfFilesTextField.getText().length()-5)+"100%\n");
                 fileReader.close();
                 fileWriter.close();
                 
@@ -150,7 +167,6 @@ public class FileEncryptorAndDecryptor
     public void decrypt(File file, JProgressBar progressBar, JLabel progressPercent, long totalSizeOfAllFiles, JTextArea progressOfFilesTextField)
     {
 
-        double percentageOfFileCopied=0;
         if(!file.isDirectory())
         {
             try
@@ -159,39 +175,66 @@ public class FileEncryptorAndDecryptor
                 {
                     destinationFile=new File(file.getAbsolutePath().toString().substring(0, file.getAbsolutePath().toString().length()-4));
                 
-                    BufferedInputStream fileReader=new BufferedInputStream(new FileInputStream(file.getAbsolutePath()));
+                    FileInputStream fileReader=new FileInputStream(file.getAbsolutePath());
                     FileOutputStream fileWriter=new FileOutputStream (destinationFile);
                 
                      //decrypting content & writing
-                    byte[] buffer = new byte[262144];
-                    int bufferSize=buffer.length;
-                   
-                    progressOfFilesTextField.setText(progressOfFilesTextField.getText()+"  0%\n");
-                    for(int i=0; i<128; i++)
-                    {
-                        if(fileReader.available()>0)
-                        {
-                            fileReader.read();
-                        }
-                    }
-                    int i = 0;
-                    while(fileReader.available()>0)
-                    {
-                        int bytesCopied=fileReader.read(buffer);
-                        
-                        byte[] EncyptByte = cipher.doFinal(buffer);
-                        
-                        fileWriter.write(EncyptByte, i , EncyptByte.length);
-                        i += EncyptByte.length;
-                        long fileLength=file.length();
-                        percentageOfFileCopied+= (((double)bytesCopied/fileLength)*100);
-                        showProgressOnprogressOfFilesTextField(progressOfFilesTextField, percentageOfFileCopied, bytesCopied, fileLength);
-
-                        showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, bytesCopied, totalSizeOfAllFiles);
-                        //System.out.println("des file length= "+destinationFile.length());
+                    byte[] buffer = new byte[fileReader.available()];
+                    SecretKeySpec desKeySpec = new SecretKeySpec(Data.Key, "DES");
+                    Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5PADDING");
+                    cipher.init(Cipher.DECRYPT_MODE, desKeySpec);
                     
-                    }
-                    progressOfFilesTextField.setText(progressOfFilesTextField.getText().substring(0, progressOfFilesTextField.getText().length()-5)+"100%\n");
+                    fileReader.read(buffer);
+                    
+                    byte[] plaintext = cipher.doFinal(buffer);
+                    
+                    fileWriter.write(plaintext);
+                    showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer.length, totalSizeOfAllFiles);
+                    
+//                    while((fileReader.available()) > 0) {
+//                    	if(fileReader.available() < 8) {
+//    	                	byte[] buffer1 = new byte[fileReader.available()];
+//    	                	fileReader.read(buffer1);
+//    	                	byte[] plaintext = cipher.doFinal(buffer1);
+//    	                	fileWriter.write(plaintext);
+//    	                	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer1.length, totalSizeOfAllFiles);
+//                    	}
+//                    	else {
+//                    		byte[] buffer = new byte[8];
+//    	                	fileReader.read(buffer);
+//    	                	byte[] plaintext = cipher.doFinal(buffer);
+//    	                	fileWriter.write(plaintext);
+//    	                	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer.length, totalSizeOfAllFiles);
+//                    	}
+//                    	
+//                    }
+                   
+//                    progressOfFilesTextField.setText(progressOfFilesTextField.getText()+"  0%\n");
+//                    for(int i=0; i<128; i++)
+//                    {
+//                        if(fileReader.available()>0)
+//                        {
+//                            fileReader.read();
+//                        }
+//                    }
+//                    int i = 0;
+//                    while(fileReader.available()>0)
+//                    {
+//                        int bytesCopied=fileReader.read(buffer);
+//                        
+//                        byte[] EncyptByte = cipher.doFinal(buffer);
+//                        
+//                        fileWriter.write(EncyptByte, i , EncyptByte.length);
+//                        i += EncyptByte.length;
+//                        long fileLength=file.length();
+//                        percentageOfFileCopied+= (((double)bytesCopied/fileLength)*100);
+//                        showProgressOnprogressOfFilesTextField(progressOfFilesTextField, percentageOfFileCopied, bytesCopied, fileLength);
+//
+//                        showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, bytesCopied, totalSizeOfAllFiles);
+//                        //System.out.println("des file length= "+destinationFile.length());
+//                    
+//                    }
+//                    progressOfFilesTextField.setText(progressOfFilesTextField.getText().substring(0, progressOfFilesTextField.getText().length()-5)+"100%\n");
                     fileReader.close();
                     fileWriter.close();
                     
