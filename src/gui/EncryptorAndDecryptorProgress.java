@@ -30,9 +30,7 @@ public class EncryptorAndDecryptorProgress extends javax.swing.JFrame
     public EncryptorAndDecryptorProgress(String encryptOrDecrypt)
     {
         this.encryptOrDecrypt=encryptOrDecrypt;
-        
-        
-        
+   
         try
         {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels())
@@ -43,18 +41,9 @@ public class EncryptorAndDecryptorProgress extends javax.swing.JFrame
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex)
+        } catch (Exception e)
         {
-            java.util.logging.Logger.getLogger(EncryptorAndDecryptorProgress.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex)
-        {
-            java.util.logging.Logger.getLogger(EncryptorAndDecryptorProgress.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex)
-        {
-            java.util.logging.Logger.getLogger(EncryptorAndDecryptorProgress.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex)
-        {
-            java.util.logging.Logger.getLogger(EncryptorAndDecryptorProgress.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            System.out.print(e);
         }
      
         initComponents();

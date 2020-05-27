@@ -165,7 +165,7 @@ public class ShowFilesAndKey extends JFrame {
 			}catch(Exception e) {}
 			//System.out.print(Data.Key);
 		}
-        new EncryptorAndDecryptor(encryptOrDecrypt);
+        new EncryptorAndDecryptor(encryptOrDecrypt).execute();
         setVisible(false);
         dispose();
         
