@@ -2,15 +2,12 @@
 package core;
 
 import gui.EncryptorAndDecryptorProgress;
-import gui.ExceptionDialog;
 import java.awt.Toolkit;
 import java.io.File;
 import javax.swing.*;
 
-/**
- *
- * @author Arlene
- */
+import data.Data;
+
 public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
 {
     File[] listOfFilesAndFolders;
@@ -25,11 +22,10 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
     JLabel progressPercentLabel;
     JButton oKButton;
     EncryptorAndDecryptorProgress progressFrame;
-    public EncryptorAndDecryptor(File[] listOfFilesAndFolders, String encryptOrDecrypt, String key)
+    public EncryptorAndDecryptor(String encryptOrDecrypt)
     {
-        this.listOfFilesAndFolders = listOfFilesAndFolders;
+        this.listOfFilesAndFolders = Data.FilesAndFolders;
         this.encryptOrDecrypt = encryptOrDecrypt;
-        this.key=key;
         progressFrame= new EncryptorAndDecryptorProgress(encryptOrDecrypt);
         progressFrame.setVisible(true);
         fileEncryptorAndDecryptor = new FileEncryptorAndDecryptor();
@@ -40,7 +36,8 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
         setTotalSizeAndNumberOfAllFiles();
     }
     
-    @Override
+    @SuppressWarnings("finally")
+	@Override
     protected Boolean doInBackground() 
     {
         try
@@ -56,7 +53,7 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
         }
         catch (Exception e)
         {
-              new ExceptionDialog("Unexpected System Error!", "Something hugely badly unexpectadly went awfully wrong", e).setVisible(true);         
+              System.out.print("Unexpected System Error!");
         }
         finally
         {
@@ -77,7 +74,7 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
         }
         catch (Exception e)
         {
-            new ExceptionDialog("Unexpected System Error!", "Something hugely badly unexpectadly went awfully wrong", e).setVisible(true);
+        	 System.out.print("Unexpected System Error!");
         }
     }
     
@@ -87,6 +84,7 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
         for(File file:listOfFilesAndFolders)
         {
             encrypt(file);
+            System.out.print("abc");
         }
         progressBar.setValue(progressBar.getMaximum());
         progressPercentLabel.setText("100%");
@@ -96,7 +94,7 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
         if(!file.isDirectory() && file.exists())
         {
             progressOfFilesTextField.append("Encrypting "+file.getAbsolutePath()+"\n");
-            fileEncryptorAndDecryptor.encrypt(file, key, progressBar, progressPercentLabel, totalSizeOfAllFiles, progressOfFilesTextField);
+            fileEncryptorAndDecryptor.encrypt(file, progressBar, progressPercentLabel, totalSizeOfAllFiles, progressOfFilesTextField);
             progressOfFilesTextField.append("Done!\n\n");
         }
         else if(file.isDirectory() && file.exists())
@@ -125,7 +123,7 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
         if(!file.isDirectory() && file.exists() && file.getName().substring(file.getName().length()-4, file.getName().length()).equalsIgnoreCase(".enc"))
         {
             progressOfFilesTextField.append("Decrypting "+file.getAbsolutePath()+"\n");
-            fileEncryptorAndDecryptor.decrypt(file, key, progressBar, progressPercentLabel, totalSizeOfAllFiles, progressOfFilesTextField);
+            fileEncryptorAndDecryptor.decrypt(file, progressBar, progressPercentLabel, totalSizeOfAllFiles, progressOfFilesTextField);
             progressOfFilesTextField.append("Done!\n\n");
         }
         else if(file.isDirectory() && file.exists())

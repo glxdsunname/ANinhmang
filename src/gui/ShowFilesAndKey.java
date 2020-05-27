@@ -3,12 +3,17 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import data.Data;
+import core.EncryptorAndDecryptor;
 
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
@@ -17,25 +22,28 @@ import java.awt.ScrollPane;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class ShowFilesAndKey extends JFrame {
 
+public class ShowFilesAndKey extends JFrame {
+	private FileInputStream fin;
 	private JPanel contentPane;
 	private String encryptOrDecrypt;
 	
 	private JScrollPane scrollPane;
-	private JTextArea textArea;
+	private JTextArea textArea, textArea_1;
 	private JButton selectFilesBtn;
 	private JButton resetFilesBtn;
-	private JButton btnNewButton_2;
+	private JButton uploadKeyBtn;
+	private JButton EnDecryptBtn;
 
 
-	/**
-	 * Create the frame.
-	 */
+	
+	
+	
 	public ShowFilesAndKey(String encryptOrDecrypt) {
 		this.encryptOrDecrypt = encryptOrDecrypt;
 		initComponent();
 		displayListOfFilesInTheTextField();
+		displayKeyInTheTextField();
 	}
 	
 	private void initComponent() {
@@ -91,23 +99,37 @@ public class ShowFilesAndKey extends JFrame {
 		resetFilesBtn.setBounds(388, 127, 103, 39);
 		contentPane.add(resetFilesBtn);
 		
-		btnNewButton_2 = new JButton("Upload Key");
-		btnNewButton_2.setBounds(388, 210, 103, 39);
-		contentPane.add(btnNewButton_2);
+		uploadKeyBtn = new JButton("Upload Key");
+		uploadKeyBtn.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+            	uploadKeyBtnActionPerformed(evt);
+            }
+        });
+		uploadKeyBtn.setBounds(388, 210, 103, 39);
+		contentPane.add(uploadKeyBtn);
 		
-		JTextArea textArea_1 = new JTextArea();
+		textArea_1 = new JTextArea();
 		textArea_1.setEditable(false);
 		textArea_1.setBounds(24, 210, 354, 39);
 		contentPane.add(textArea_1);
 		
-		JButton btnNewButton = new JButton(encryptOrDecrypt);
-		btnNewButton.setBounds(217, 272, 96, 36);
-		contentPane.add(btnNewButton);
+		EnDecryptBtn = new JButton(encryptOrDecrypt);
+		EnDecryptBtn.addActionListener(new java.awt.event.ActionListener()
+        {
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+            	EnDecryptBtnActionPerformed(evt);
+            }
+        });
+		EnDecryptBtn.setBounds(217, 272, 96, 36);
+		contentPane.add(EnDecryptBtn);
 	}
 	
 	private void selectFileBtnActionPerformed(java.awt.event.ActionEvent evt)
     {   
-        new FileChooser(encryptOrDecrypt).setVisible(true);
+        new FileChooser(encryptOrDecrypt , false).setVisible(true);
         setVisible(false);
         dispose();
     }
@@ -118,6 +140,37 @@ public class ShowFilesAndKey extends JFrame {
         displayListOfFilesInTheTextField();
     }
 	
+	private void uploadKeyBtnActionPerformed(java.awt.event.ActionEvent evt)
+    {   
+        new FileChooser(encryptOrDecrypt , true).setVisible(true);
+        setVisible(false);
+        dispose();
+    }
+	
+	private void EnDecryptBtnActionPerformed(java.awt.event.ActionEvent evt)
+    {   
+        if(Data.FilesAndFolders == null) {
+        	
+        	return;
+        }
+        if(Data.keyFile == null) {
+        	return;
+        }
+        if(Data.keyFile != null) {
+			try {
+				fin = new FileInputStream(Data.keyFile[0].getAbsolutePath());
+				byte[] a = new byte[fin.available()];
+				fin.read(a);
+				Data.Key = a;
+			}catch(Exception e) {}
+			//System.out.print(Data.Key);
+		}
+        new EncryptorAndDecryptor(encryptOrDecrypt);
+        setVisible(false);
+        dispose();
+        
+    }
+	
 	private void displayListOfFilesInTheTextField()
     {
 		File[] listOfFilesAndFolders = Data.FilesAndFolders;
@@ -125,11 +178,23 @@ public class ShowFilesAndKey extends JFrame {
     		textArea.setText("");
     		return;
     	}
+    	
         for(Integer i=0, j=1; i < listOfFilesAndFolders.length; i++, j++)
         {
         	textArea.append(j.toString()+". "+listOfFilesAndFolders[i].getName()+"\n");
         	textArea.append(listOfFilesAndFolders[i].getAbsolutePath()+"\n\n");
         }
+        
+    }
+	
+	private void displayKeyInTheTextField()
+    {
+		
+    	if(Data.keyFile == null) {
+    		textArea_1.setText("");
+    		return;
+    	}
+    	textArea_1.append(Data.keyFile[0].getName());
         
     }
 }

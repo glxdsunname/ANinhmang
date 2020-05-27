@@ -1,9 +1,6 @@
 
 package core;
 
-import gui.ExceptionDialog;
-import gui.SourceFileNotDeletedDuringDecryption;
-import gui.SourceFileNotDeletedDuringEncryption;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,12 +9,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+
+import data.Data;
 
 public class FileEncryptorAndDecryptor
 {
@@ -82,7 +87,7 @@ public class FileEncryptorAndDecryptor
     }
     
     
-    public void encrypt(File file, String key, JProgressBar progressBar, JLabel progressPercentLabel, long totalSizeOfAllFiles, JTextArea progressOfFilesTextField)
+    public void encrypt(File file, JProgressBar progressBar, JLabel progressPercentLabel, long totalSizeOfAllFiles, JTextArea progressOfFilesTextField)
     {
         byte[] keyHash;
         double percentageOfFileCopied=0;
@@ -99,25 +104,25 @@ public class FileEncryptorAndDecryptor
                     destinationFile=new File(file.getAbsolutePath().concat(".enc"));
                 }
                 
-                BufferedInputStream fileReader=new BufferedInputStream(new FileInputStream(file.getAbsolutePath()));
-                FileOutputStream fileWriter=new FileOutputStream (destinationFile, true);
+                //BufferedInputStream fileReader=new BufferedInputStream(new FileInputStream(file.getAbsolutePath()));
+                FileInputStream fileReader = new FileInputStream(file.getAbsolutePath()); 
+                FileOutputStream fileWriter= new FileOutputStream (destinationFile, true);
                 
-                //writing key hash to file
-                fileWriter.write(keyHash, 0, 128); 
+                
                 
                 //encrypting content & writing
                 byte[] buffer = new byte[262144];
                 int bufferSize=buffer.length;
-                int keySize=key.length();
+                byte[] key = Data.Key;
+                SecretKeySpec desKeySpec = new SecretKeySpec(key, "DES");
+                Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5PADDING");
+                cipher.init(Cipher.ENCRYPT_MODE, desKeySpec);
+                
+                
                 progressOfFilesTextField.setText(progressOfFilesTextField.getText()+"  0%\n");
                 while(fileReader.available()>0)
                 {
                     int bytesCopied=fileReader.read(buffer);
-                    for(int i=0,keyCounter=0; i<bufferSize; i++, keyCounter%=keySize )
-                    {
-
-                        buffer[i]+=key.toCharArray()[keyCounter];
-                    }
                     
                     fileWriter.write(buffer, 0, bytesCopied);
                     long fileLength=file.length();
@@ -131,49 +136,26 @@ public class FileEncryptorAndDecryptor
                 progressOfFilesTextField.setText(progressOfFilesTextField.getText().substring(0, progressOfFilesTextField.getText().length()-5)+"100%\n");
                 fileReader.close();
                 fileWriter.close();
-                if(!file.delete())
-                {
-                    new SourceFileNotDeletedDuringEncryption(new javax.swing.JFrame(), true, file.getAbsolutePath()).setVisible(true);
-                }
                 
-            } 
-            catch (NoSuchAlgorithmException e)
-            {
-                new ExceptionDialog("NoSuchAlgorithmException!", "Something hugely badly unexpectadly went awfully wrong", e).setVisible(true);
-                Logger.getLogger(FileEncryptorAndDecryptor.class.getName()).log(Level.SEVERE, null, e);
-            }
-            catch (SecurityException e)
-            {
-                new ExceptionDialog("File Security Error!!!", file+" doesn't allow you to do that!", e).setVisible(true);
-            }
-            catch (FileNotFoundException e)
-            {
-                new ExceptionDialog("File Not Found!!!", file+" not found!", e).setVisible(true);
-            }
-            catch (IOException e)
-            {
-                new ExceptionDialog("Can Not Read or Write file!!!", file+" can not be read or written!", e).setVisible(true);
+                
             }
             catch (Exception e)
             {
-                 new ExceptionDialog("Unexpected System Error!", "Something hugely badly unexpectadly went awfully wrong", e).setVisible(true);
+                 System.out.print(e);
             }
             
         }
     }
     
-    public void decrypt(File file, String key, JProgressBar progressBar, JLabel progressPercent, long totalSizeOfAllFiles, JTextArea progressOfFilesTextField)
+    public void decrypt(File file, JProgressBar progressBar, JLabel progressPercent, long totalSizeOfAllFiles, JTextArea progressOfFilesTextField)
     {
-        String keyHash;
+
         double percentageOfFileCopied=0;
         if(!file.isDirectory())
         {
             try
             {
-                keyHash=getHashInString(key);
-                
-                
-                if( areHashesEqual(file, keyHash))
+                if( true)
                 {
                     destinationFile=new File(file.getAbsolutePath().toString().substring(0, file.getAbsolutePath().toString().length()-4));
                 
@@ -183,7 +165,7 @@ public class FileEncryptorAndDecryptor
                      //decrypting content & writing
                     byte[] buffer = new byte[262144];
                     int bufferSize=buffer.length;
-                    int keySize=key.length();
+                   
                     progressOfFilesTextField.setText(progressOfFilesTextField.getText()+"  0%\n");
                     for(int i=0; i<128; i++)
                     {
@@ -192,58 +174,34 @@ public class FileEncryptorAndDecryptor
                             fileReader.read();
                         }
                     }
+                    int i = 0;
                     while(fileReader.available()>0)
                     {
                         int bytesCopied=fileReader.read(buffer);
-                        for(int i=0,keyCounter=0; i<bufferSize; i++, keyCounter%=keySize )
-                        {
-
-                            buffer[i]-=key.toCharArray()[keyCounter];
-                        }
-
-                        fileWriter.write(buffer, 0, bytesCopied);
+                        
+                        byte[] EncyptByte = cipher.doFinal(buffer);
+                        
+                        fileWriter.write(EncyptByte, i , EncyptByte.length);
+                        i += EncyptByte.length;
                         long fileLength=file.length();
                         percentageOfFileCopied+= (((double)bytesCopied/fileLength)*100);
                         showProgressOnprogressOfFilesTextField(progressOfFilesTextField, percentageOfFileCopied, bytesCopied, fileLength);
 
                         showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, bytesCopied, totalSizeOfAllFiles);
-                        System.out.println("des file length= "+destinationFile.length());
+                        //System.out.println("des file length= "+destinationFile.length());
                     
                     }
                     progressOfFilesTextField.setText(progressOfFilesTextField.getText().substring(0, progressOfFilesTextField.getText().length()-5)+"100%\n");
                     fileReader.close();
                     fileWriter.close();
-                    if(!file.delete())
-                    {
-                        new SourceFileNotDeletedDuringDecryption(new javax.swing.JFrame(), true, file.getAbsolutePath()).setVisible(true);
-                    }
+                    
                 }
-                else if(!areHashesEqual(file, keyHash))
-                {
-                    progressOfFilesTextField.append("\nPassword is verified using SHA-512 (128 bit) hash.\nLooks like the Input Password and the File Password differ!!\nEven if you bypass the hash (somehow) you won't be able to read the file because the file is encrypted at byte level.\nWithout the actual password you have no chance.\nYour Bad Luck ☺\n\n");
-                }
+               
                 
-            }
-            catch (NoSuchAlgorithmException e)
-            {
-                new ExceptionDialog("NoSuchAlgorithmException!", "Something hugely badly unexpectadly went awfully wrong", e).setVisible(true);
-                Logger.getLogger(FileEncryptorAndDecryptor.class.getName()).log(Level.SEVERE, null, e);
-            }
-            catch (SecurityException e)
-            {
-                new ExceptionDialog("File Security Error!!!", file+" doesn't allow you to do that!", e).setVisible(true);
-            }
-            catch (FileNotFoundException e)
-            {
-                new ExceptionDialog("File Not Found!!!", file+" not found!", e).setVisible(true);
-            }
-            catch (IOException e)
-            {
-                new ExceptionDialog("Can Not Read or Write file!!!", file+" can not be read or written!", e).setVisible(true);
-            }            
+            }      
             catch (Exception e)
             {
-                 new ExceptionDialog("Unexpected System Error!", "Something hugely badly unexpectadly went awfully wrong", e).setVisible(true);
+                 System.out.print(e);
             }            
         }
     }

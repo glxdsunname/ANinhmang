@@ -18,14 +18,16 @@ public class FileChooser extends javax.swing.JFrame
    
 	private static final long serialVersionUID = 1L;
 	
-	 private javax.swing.JFileChooser jFileChooser1;
+	private javax.swing.JFileChooser jFileChooser1;
 	
     private String encryptOrDecrypt;
+    private Boolean isKey = false;
     boolean addingNewFilesToExisting;
     
-    public FileChooser(String encryptOrDecrypt)
+    public FileChooser(String encryptOrDecrypt , boolean isKey)
     {
         this.encryptOrDecrypt=encryptOrDecrypt;
+        this.isKey = isKey;
         
         try
         {
@@ -161,6 +163,17 @@ public class FileChooser extends javax.swing.JFrame
         
         else if(evt.getActionCommand().toString().equals("ApproveSelection"))
         {
+        	if (this.isKey) {
+        		File[] newFilesAndFolders=jFileChooser1.getSelectedFiles();
+        		
+        		//System.out.print(newFilesAndFolders.length);
+        		
+        		Data.keyFile = newFilesAndFolders;
+        		new ShowFilesAndKey(encryptOrDecrypt).setVisible(true);
+                setVisible(false);
+                dispose();
+                return;
+        	}
             
             if(Data.FilesAndFolders == null)
             {
