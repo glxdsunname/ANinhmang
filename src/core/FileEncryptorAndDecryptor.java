@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
@@ -30,66 +32,42 @@ public class FileEncryptorAndDecryptor
     private double accumulator=0;
     
     
-    boolean areHashesEqual(File file, String keyHash) throws FileNotFoundException, IOException
+    boolean areHashesEqual(byte[] firstHashValue, byte[] secondHashValue)
     {
-        
-        BufferedInputStream fileReader=new BufferedInputStream(new FileInputStream(file.getAbsolutePath()));
-        //reading key hash from file
-        StringBuffer keyHashFromFile=new StringBuffer(128);
-        for(int i=0; i<128; i++)
-        {
-            keyHashFromFile.append((char)fileReader.read());
+        if(firstHashValue.length != secondHashValue.length) return false;
+        for(int i = 0; i < firstHashValue.length; i++) {
+        	if(firstHashValue[i] != secondHashValue[i]) return false;
         }
-                
-        //verifying both hashes
-        System.out.println("keyHashFromFile.to string()= "+keyHashFromFile);
-        System.out.println("keyHash= "+keyHash);
-        fileReader.close();
-        if(keyHashFromFile.toString().equals(keyHash))
-        {
-            return true;
-        }
-        return false;
+        return true;
     }
     
-    private byte[] getHashInBytes(String key) throws NoSuchAlgorithmException
+    private byte[] hashByte(byte[] originalByte) throws NoSuchAlgorithmException
     {
-        byte[] keyHash;
-        final MessageDigest md = MessageDigest.getInstance("SHA-512");
-                keyHash = md.digest(key.getBytes());
-                StringBuilder sb = new StringBuilder();
-                for(int i=0; i< keyHash.length ;i++)
-                {
-                    sb.append(Integer.toString((keyHash[i] & 0xff) + 0x100, 16).substring(1));
-                }
-                String hashOfPassword = sb.toString();
-                System.out.println("hashOfPassword length= "+hashOfPassword.length());
-                System.out.println("hashOfPassword = " +hashOfPassword);
-                return hashOfPassword.getBytes();
-                
+    	MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hashValue =  md.digest(originalByte);
+        return hashValue;
     }
     
-    private String getHashInString(String key) throws NoSuchAlgorithmException
+    private byte[] mergeByte(byte[] firstHashValue, byte[] secondHashValue) throws NoSuchAlgorithmException
     {
-        byte[] keyHash;
-        final MessageDigest md = MessageDigest.getInstance("SHA-512");
-                keyHash = md.digest(key.getBytes());
-                StringBuilder sb = new StringBuilder();
-                for(int i=0; i< keyHash.length ;i++)
-                {
-                    sb.append(Integer.toString((keyHash[i] & 0xff) + 0x100, 16).substring(1));
-                }
-                String hashOfPassword = sb.toString();
-                System.out.println("hashOfPassword length= "+hashOfPassword.length());
-                System.out.println("hashOfPassword = " +hashOfPassword);
-                return hashOfPassword;
-                
+    	byte[] mergeArray = new byte[firstHashValue.length+secondHashValue.length];
+    	int i;
+    	for(i = 0; i < firstHashValue.length;i++) {
+    		mergeArray[i] = firstHashValue[i];
+    	}
+    	for(int j = 0; j < secondHashValue.length ; j++) {
+    		mergeArray[i++] = secondHashValue[j];
+    	}
+    	
+        return mergeArray;
     }
+    
+
     
     
     public void encrypt(File file, JProgressBar progressBar, JLabel progressPercentLabel, long totalSizeOfAllFiles, JTextArea progressOfFilesTextField)
     {
-        double percentageOfFileCopied=0;
+       // double percentageOfFileCopied=0;
         if(!file.isDirectory())
         {
             try
@@ -114,44 +92,15 @@ public class FileEncryptorAndDecryptor
                 
                 byte[] buffer = new byte[fileReader.available()];
             	fileReader.read(buffer);
-            	byte[] ciphertext = cipher.doFinal(buffer);
+            	
+            	byte[] hashValue = hashByte(buffer);
+            	byte[] mergeByte = mergeByte(buffer, hashValue);
+            	
+            	
+            	byte[] ciphertext = cipher.doFinal(mergeByte);
             	fileWriter.write(ciphertext);
             	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, buffer.length, totalSizeOfAllFiles);
-                
-//                while((fileReader.available()) > 0) {
-//                	if(fileReader.available() < 8) {
-//	                	byte[] buffer = new byte[fileReader.available()];
-//	                	fileReader.read(buffer);
-//	                	byte[] ciphertext = cipher.doFinal(buffer);
-//	                	fileWriter.write(ciphertext);
-//	                	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, buffer.length, totalSizeOfAllFiles);
-//                	}
-//                	else {
-//                		byte[] buffer = new byte[8];
-//	                	fileReader.read(buffer);
-//	                	byte[] ciphertext = cipher.doFinal(buffer);
-//	                	fileWriter.write(ciphertext);
-//	                	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, buffer.length, totalSizeOfAllFiles);
-//                	}
-//                }
-                  
-//                
-//                progressOfFilesTextField.setText(progressOfFilesTextField.getText()+"  0%\n");
-//                while(fileReader.available()>0)
-//                {
-//                    int bytesCopied=fileReader.read(buffer);
-//                    
-//                    fileWriter.write(buffer, 0, bytesCopied);
-//                    long fileLength=file.length();
-//                    percentageOfFileCopied+= (((double)bytesCopied/fileLength)*100);
-//                    showProgressOnprogressOfFilesTextField(progressOfFilesTextField, percentageOfFileCopied, bytesCopied, fileLength);
-//                    
-//                    showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, bytesCopied, totalSizeOfAllFiles);
-//                    
-//                    System.out.println("des file length= "+destinationFile.length());
-//                }
-//                progressOfFilesTextField.setText(progressOfFilesTextField.getText().substring(0, progressOfFilesTextField.getText().length()-5)+"100%\n");
-                fileReader.close();
+            	fileReader.close();
                 fileWriter.close();
                 
                 
@@ -188,53 +137,17 @@ public class FileEncryptorAndDecryptor
                     
                     byte[] plaintext = cipher.doFinal(buffer);
                     
-                    fileWriter.write(plaintext);
-                    showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer.length, totalSizeOfAllFiles);
+                    byte[] originalByte = Arrays.copyOfRange(plaintext, 0, plaintext.length-32);
+                    byte[] hashValueRecived = Arrays.copyOfRange(plaintext, plaintext.length-32, plaintext.length);
+                    byte[] hashOriginalByte = hashByte(originalByte);
                     
-//                    while((fileReader.available()) > 0) {
-//                    	if(fileReader.available() < 8) {
-//    	                	byte[] buffer1 = new byte[fileReader.available()];
-//    	                	fileReader.read(buffer1);
-//    	                	byte[] plaintext = cipher.doFinal(buffer1);
-//    	                	fileWriter.write(plaintext);
-//    	                	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer1.length, totalSizeOfAllFiles);
-//                    	}
-//                    	else {
-//                    		byte[] buffer = new byte[8];
-//    	                	fileReader.read(buffer);
-//    	                	byte[] plaintext = cipher.doFinal(buffer);
-//    	                	fileWriter.write(plaintext);
-//    	                	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer.length, totalSizeOfAllFiles);
-//                    	}
-//                    	
-//                    }
-                   
-//                    progressOfFilesTextField.setText(progressOfFilesTextField.getText()+"  0%\n");
-//                    for(int i=0; i<128; i++)
-//                    {
-//                        if(fileReader.available()>0)
-//                        {
-//                            fileReader.read();
-//                        }
-//                    }
-//                    int i = 0;
-//                    while(fileReader.available()>0)
-//                    {
-//                        int bytesCopied=fileReader.read(buffer);
-//                        
-//                        byte[] EncyptByte = cipher.doFinal(buffer);
-//                        
-//                        fileWriter.write(EncyptByte, i , EncyptByte.length);
-//                        i += EncyptByte.length;
-//                        long fileLength=file.length();
-//                        percentageOfFileCopied+= (((double)bytesCopied/fileLength)*100);
-//                        showProgressOnprogressOfFilesTextField(progressOfFilesTextField, percentageOfFileCopied, bytesCopied, fileLength);
-//
-//                        showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, bytesCopied, totalSizeOfAllFiles);
-//                        //System.out.println("des file length= "+destinationFile.length());
-//                    
-//                    }
-//                    progressOfFilesTextField.setText(progressOfFilesTextField.getText().substring(0, progressOfFilesTextField.getText().length()-5)+"100%\n");
+                    if(!areHashesEqual(hashOriginalByte, hashValueRecived)) {
+                    	System.out.print("some one had modify data");
+                    	return;
+                    }
+                    
+                    fileWriter.write(originalByte);
+                    showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer.length, totalSizeOfAllFiles);                
                     fileReader.close();
                     fileWriter.close();
                     

@@ -34,25 +34,7 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
         progressPercentLabel = progressFrame.getProgressPercentLabel();
         oKButton=progressFrame.getoKButton();
         setTotalSizeAndNumberOfAllFiles();
-//        try
-//        {
-//            if(encryptOrDecrypt.equalsIgnoreCase("encrypt"))
-//            {
-//                encrypt();
-//            }
-//            else if(encryptOrDecrypt.equalsIgnoreCase("decrypt"))
-//            {
-//                decrypt();            
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//              System.out.print("Unexpected System Error!");
-//        }
-//        finally
-//        {
-//            return;
-//        }
+
     }
     
   
