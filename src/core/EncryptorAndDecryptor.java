@@ -88,7 +88,6 @@ public class EncryptorAndDecryptor extends SwingWorker <Boolean,Boolean>
         for(File file:listOfFilesAndFolders)
         {
             encrypt(file);
-            System.out.print("abc");
         }
         progressBar.setValue(progressBar.getMaximum());
         progressPercentLabel.setText("100%");

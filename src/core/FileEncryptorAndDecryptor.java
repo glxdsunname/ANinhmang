@@ -98,8 +98,11 @@ public class FileEncryptorAndDecryptor
             	
             	
             	byte[] ciphertext = cipher.doFinal(mergeByte);
-            	fileWriter.write(ciphertext);
-            	showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, buffer.length, totalSizeOfAllFiles);
+            	
+            	for(int i = 0; i < ciphertext.length; i++) {
+            		fileWriter.write(ciphertext[i]);
+            		showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, 1, totalSizeOfAllFiles);
+            	}
             	fileReader.close();
                 fileWriter.close();
                 
@@ -146,7 +149,12 @@ public class FileEncryptorAndDecryptor
                     	return;
                     }
                     
-                    fileWriter.write(originalByte);
+                    //fileWriter.write(originalByte);
+
+                	for(int i = 0; i < originalByte.length; i++) {
+                		fileWriter.write(originalByte[i]);
+                		showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, 1, totalSizeOfAllFiles);
+                	}
                     showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer.length, totalSizeOfAllFiles);                
                     fileReader.close();
                     fileWriter.close();
