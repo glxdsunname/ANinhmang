@@ -82,7 +82,7 @@ public class FileChooser extends javax.swing.JFrame
             {   
                 setVisible(false);
                 dispose();
-                new Home().setVisible(true);
+                new ShowFilesAndKey(encryptOrDecrypt).setVisible(true);
             }
         });
         
