@@ -249,7 +249,7 @@ public class ShowFilesAndKey extends JFrame {
 	}
 	
 	private void initGenerateKey() {
-		keyOptionLbl.setText("Don't have an key yet? :");
+		keyOptionLbl.setText("Don't have a key yet? :");
 		KeyScrollPane.setBounds(41, 66, 429, 46);
 		btnNewButton = new JButton("Auto GenKey");
 		btnNewButton.addActionListener(new java.awt.event.ActionListener()

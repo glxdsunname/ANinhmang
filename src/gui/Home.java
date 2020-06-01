@@ -101,17 +101,17 @@ public class Home extends JFrame {
 		JLabel lblNewLabel = new JLabel("This Application use:");
 		lblNewLabel.setFont(new Font("Arial", Font.BOLD, 14));
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setBounds(58, 25, 178, 40);
+		lblNewLabel.setBounds(22, 25, 178, 40);
 		contentPane.add(lblNewLabel);
 		
-		JLabel lblNewLabel_1 = new JLabel("- DES to protect confidentiality data");
+		JLabel lblNewLabel_1 = new JLabel("- DES to protect the confidentiality of the data.");
 		lblNewLabel_1.setFont(new Font("Arial", Font.BOLD, 14));
-		lblNewLabel_1.setBounds(76, 62, 250, 22);
+		lblNewLabel_1.setBounds(51, 62, 348, 22);
 		contentPane.add(lblNewLabel_1);
 		
-		JLabel lblShaTo = new JLabel("- SHA-256 to protect integrity data");
+		JLabel lblShaTo = new JLabel("- SHA-256 for verifying the integrity of data");
 		lblShaTo.setFont(new Font("Arial", Font.BOLD, 14));
-		lblShaTo.setBounds(76, 95, 250, 22);
+		lblShaTo.setBounds(51, 95, 319, 22);
 		contentPane.add(lblShaTo);
 	}
 	
