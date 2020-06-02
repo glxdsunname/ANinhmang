@@ -3,6 +3,7 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -16,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 
 public class Home extends JFrame {
@@ -64,6 +66,7 @@ public class Home extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
+		contentPane.setLocation(0, 0);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -113,6 +116,11 @@ public class Home extends JFrame {
 		lblShaTo.setFont(new Font("Arial", Font.BOLD, 14));
 		lblShaTo.setBounds(51, 95, 319, 22);
 		contentPane.add(lblShaTo);
+		
+		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+	    int x = (int) ((dimension.getWidth() - contentPane.getWidth()) / 2);
+	    int y = (int) ((dimension.getHeight() - contentPane.getHeight()) / 2);
+	    contentPane.setLocation(x, y);
 	}
 	
 	private void encryptButtonActionPerformed(java.awt.event.ActionEvent evt)

@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
@@ -29,17 +29,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JLabel;
 import java.awt.Font;
-import javax.swing.JRadioButton;
-import javax.swing.JComboBox;
-import javax.swing.JSeparator;
+
 import java.awt.Color;
-import java.awt.Component;
+import static javax.swing.JOptionPane.showMessageDialog;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.swing.Box;
-import java.awt.Dimension;
-import javax.swing.border.LineBorder;
+
 import javax.swing.border.EtchedBorder;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -351,10 +347,11 @@ public class ShowFilesAndKey extends JFrame {
 	private void EnDecryptBtnActionPerformed(java.awt.event.ActionEvent evt)
     {   
         if(Data.FilesAndFolders == null) {
-        	
+        	showMessageDialog(null, "please choose at least one file");
         	return;
         }
         if(Data.keyFile == null) {
+        	showMessageDialog(null, "please choose key");
         	return;
         }
         if(Data.keyFile != null) {

@@ -92,7 +92,7 @@ public class FileEncryptorAndDecryptor
                 
                 byte[] buffer = new byte[fileReader.available()];
             	fileReader.read(buffer);
-            	
+            	System.out.print(fileReader.available());
             	byte[] hashValue = hashByte(buffer);
             	byte[] mergeByte = mergeByte(buffer, hashValue);
             	
@@ -137,6 +137,7 @@ public class FileEncryptorAndDecryptor
                     cipher.init(Cipher.DECRYPT_MODE, desKeySpec);
                     
                     fileReader.read(buffer);
+                    System.out.print(fileReader.available());
                     
                     byte[] plaintext = cipher.doFinal(buffer);
                     

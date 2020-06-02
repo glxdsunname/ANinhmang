@@ -6,6 +6,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import static javax.swing.JFileChooser.FILES_AND_DIRECTORIES;
+import static javax.swing.JOptionPane.showMessageDialog;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -46,6 +48,7 @@ public class FileChooser extends javax.swing.JFrame
         initComponents();
         jFileChooser1.setDialogTitle("Select files & those folders whose files you wish to "+encryptOrDecrypt);
         jFileChooser1.setMultiSelectionEnabled(true);
+        
         jFileChooser1.setFileSelectionMode(FILES_AND_DIRECTORIES);
         jFileChooser1.setDialogTitle(encryptOrDecrypt);
         if(encryptOrDecrypt.equalsIgnoreCase("encrypt"))
@@ -98,7 +101,7 @@ public class FileChooser extends javax.swing.JFrame
             {
                 System.out.println(file.getAbsoluteFile()+ " is already encrypted");
                 Toolkit.getDefaultToolkit().beep();
-                JOptionPane.showMessageDialog(null, "1 or more files are already encrypted !! \nPlease de-select them.");
+                JOptionPane.showMessageDialog(null, "files are already encrypted !! \nPlease choose other file.");
                 return true;
             } 
         }
@@ -112,11 +115,14 @@ public class FileChooser extends javax.swing.JFrame
             String filePath=file.getAbsoluteFile().toString();
             if(!file.isDirectory() &&!filePath.substring(filePath.length()-4, filePath.length()).equals(".enc"))
             {
-                System.out.println(file.getAbsoluteFile()+ " is not encrypted");
+                //System.out.println(file.getAbsoluteFile()+ " is not encrypted");
                 Toolkit.getDefaultToolkit().beep();
-                JOptionPane.showMessageDialog(null, "1 or more files are not encrypted !! \nPlease de-select them.");
+                JOptionPane.showMessageDialog(null, "Please choose file .enc \n Or folder contain file .enc only.");
                 return false;
             } 
+            else if(file.isDirectory()){
+            	if(!allAreEncFiles(file.listFiles())) return false;
+			}
         }
         return true;
     }
@@ -174,10 +180,22 @@ public class FileChooser extends javax.swing.JFrame
                 dispose();
                 return;
         	}
+        	
+        	File[] newFilesAndFolders=jFileChooser1.getSelectedFiles();
+        	
+        	if(encryptOrDecrypt.equalsIgnoreCase("encrypt") && anyEncFileExists(newFilesAndFolders))
+            {
+                return;
+            }
+            else if(encryptOrDecrypt.equalsIgnoreCase("decrypt") && !allAreEncFiles(newFilesAndFolders))
+            {
+                return;
+            }
             
             if(Data.FilesAndFolders == null)
             {
-            	Data.FilesAndFolders=jFileChooser1.getSelectedFiles();
+            	
+            	Data.FilesAndFolders = newFilesAndFolders;
             	new ShowFilesAndKey(encryptOrDecrypt).setVisible(true);
                 setVisible(false);
                 dispose();
@@ -185,18 +203,7 @@ public class FileChooser extends javax.swing.JFrame
             
             else
             {
-            	File[] newFilesAndFolders=jFileChooser1.getSelectedFiles();
             	
-            	if(encryptOrDecrypt.equalsIgnoreCase("encrypt") && anyEncFileExists(newFilesAndFolders))
-                {
-                    return;
-                }
-                else if(encryptOrDecrypt.equalsIgnoreCase("decrypt") && !allAreEncFiles(newFilesAndFolders))
-                {
-                     return;
-                }
-                
-             
                 
                 int newLength= newFilesAndFolders.length + Data.FilesAndFolders.length;
         
