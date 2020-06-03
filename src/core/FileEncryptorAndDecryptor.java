@@ -1,6 +1,8 @@
 
 package core;
 
+import static javax.swing.JOptionPane.showMessageDialog;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -92,7 +94,7 @@ public class FileEncryptorAndDecryptor
                 
                 byte[] buffer = new byte[fileReader.available()];
             	fileReader.read(buffer);
-            	System.out.print(fileReader.available());
+            	
             	byte[] hashValue = hashByte(buffer);
             	byte[] mergeByte = mergeByte(buffer, hashValue);
             	
@@ -103,9 +105,11 @@ public class FileEncryptorAndDecryptor
             		fileWriter.write(ciphertext[i]);
             		showProgressOnProgressBarAndProgressPercent(progressBar, progressPercentLabel, 1, totalSizeOfAllFiles);
             	}
+            	
             	fileReader.close();
                 fileWriter.close();
                 
+                if(file.exists());
                 
             }
             catch (Exception e)
@@ -137,7 +141,6 @@ public class FileEncryptorAndDecryptor
                     cipher.init(Cipher.DECRYPT_MODE, desKeySpec);
                     
                     fileReader.read(buffer);
-                    System.out.print(fileReader.available());
                     
                     byte[] plaintext = cipher.doFinal(buffer);
                     
@@ -147,6 +150,7 @@ public class FileEncryptorAndDecryptor
                     
                     if(!areHashesEqual(hashOriginalByte, hashValueRecived)) {
                     	System.out.print("some one had modify data");
+                    	showMessageDialog(null, "lost or some one had modified data");
                     	return;
                     }
                     
@@ -156,9 +160,11 @@ public class FileEncryptorAndDecryptor
                 		fileWriter.write(originalByte[i]);
                 		showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, 1, totalSizeOfAllFiles);
                 	}
-                    showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer.length, totalSizeOfAllFiles);                
+                    showProgressOnProgressBarAndProgressPercent(progressBar, progressPercent, buffer.length, totalSizeOfAllFiles);       
+                    
                     fileReader.close();
                     fileWriter.close();
+                    if(file.exists()) file.delete();
                     
                 }
                
